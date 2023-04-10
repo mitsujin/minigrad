@@ -14,10 +14,12 @@ namespace MiniGrad
 
         size_t calculateIndex(const IndexArray& indices) const;
         size_t size() const noexcept { return m_size; }
+        const IndexArray& strides() const noexcept { return m_strides; }
+        const IndexArray& shape() const noexcept { return m_shape; }
 
     private:
-        IndexArray m_strides;
         IndexArray m_shape;
+        IndexArray m_strides;
         size_t m_size;
     };
 }

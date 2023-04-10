@@ -41,7 +41,52 @@ namespace MiniGrad
             return m_shapeHelper.size();
         }
 
+        template <typename U>
+        friend std::ostream& operator << (std::ostream& oss, const Tensor<U>& t)
+        {
+            t.printTensor(oss);
+            return oss;
+        }
+
     private:
+        void printTensor(std::ostream& oss, IndexArray indices = {}, size_t dim = 0) const
+        {
+            auto& shape = m_shapeHelper.shape();
+            auto& strides = m_shapeHelper.strides();
+            if (dim == shape.size() - 1) 
+            {
+                oss << "[";
+                for (size_t i = 0u; i < shape[dim]; i++)
+                {
+                    indices.push_back(i);
+                    oss << at(indices);
+                    indices.pop_back();
+
+                    if (i != shape[dim] - 1)
+                    {
+                        oss << ", ";
+                    }
+                }
+                oss << "]";
+            }
+            else
+            {
+                oss << "[";
+                for (size_t i = 0u; i < shape[dim]; i++)
+                {
+                    indices.push_back(i);
+                    printTensor(oss, indices, dim + 1);
+                    indices.pop_back();
+
+                    if (i != shape[dim] - 1)
+                    {
+                        oss << ",\n";
+                    }
+                }
+                oss << "]";
+            }
+        }
+
         T* m_data = nullptr;
         TensorShapeHelper m_shapeHelper;
     };

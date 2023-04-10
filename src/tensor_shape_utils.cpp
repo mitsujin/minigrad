@@ -17,7 +17,8 @@ namespace MiniGrad
     }
 
     TensorShapeHelper::TensorShapeHelper(const IndexArray& shape)
-    : m_strides(shape.size(), 1)
+    : m_shape(shape)
+    , m_strides(shape.size(), 1)
     , m_size(calculateSize(shape))
     {
         if (m_strides.size() > 1)
