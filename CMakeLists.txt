@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
 
 if (POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
