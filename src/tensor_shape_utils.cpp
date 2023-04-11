@@ -1,5 +1,6 @@
 #include "tensor_shape_utils.h"
 #include <stdexcept>
+#include <sstream>
 
 namespace MiniGrad
 {
@@ -40,9 +41,14 @@ namespace MiniGrad
         size_t index = 0;
         for (size_t i = 0; i < indices.size(); i++)
         {
-            if (index >= m_shape[i])
+            if (indices[i] >= m_shape[i])
             {
-                throw std::out_of_range("Index is out of range of the shape");
+                std::ostringstream oss;
+                oss << "Index " << indices[i] << ", is out of range of the shape: " << m_shape[i] << std::endl;
+                oss << "Indices: ";
+                for (auto& idx : indices) oss << idx << ",";
+                oss << std::endl;
+                throw std::out_of_range(oss.str().c_str());
             }
             index += m_strides[i] * indices[i];
         }
