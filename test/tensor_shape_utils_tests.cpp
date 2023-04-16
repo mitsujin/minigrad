@@ -69,4 +69,17 @@ namespace MiniGrad
         EXPECT_THAT([&]() { ts.calculateIndex({3, 0, 0}); }, testing::Throws<std::out_of_range>());
         EXPECT_THAT([&]() { ts.calculateIndex({0, 0, 0, 0}); }, testing::Throws<std::out_of_range>());
     }
+
+    TEST(TensorHapeHelpler, TestSize)
+    {
+        TensorShapeHelper ts({1, 2, 3, 4});
+        ASSERT_EQ(24, ts.size());
+    }
+    
+    TEST(TensorHapeHelpler, TestInvalidSize)
+    {
+        EXPECT_THAT([]() {
+            TensorShapeHelper ts({});
+        }, testing::Throws<std::out_of_range>());
+    }
 }

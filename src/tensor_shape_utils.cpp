@@ -22,6 +22,11 @@ namespace MiniGrad
     , m_strides(shape.size(), 1)
     , m_size(calculateSize(shape))
     {
+        if (shape.size() == 0)
+        {
+            throw std::out_of_range("Invalid size passed");
+        }
+
         if (m_strides.size() > 1)
         {
             for (int i = m_strides.size() - 2; i >= 0; i--)
