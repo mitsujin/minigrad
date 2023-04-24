@@ -80,6 +80,12 @@ namespace MiniGrad
             return oss;
         }
 
+        // Operations
+        Tensor& operator + (Tensor& other)
+        {
+            return *this;
+        }
+
     private:
         void printTensor(std::ostream& oss, IndexArray indices = {}, size_t dim = 0) const
         {

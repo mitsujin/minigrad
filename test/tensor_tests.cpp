@@ -52,6 +52,9 @@ namespace MiniGrad
         Tensor<int> t2 = t;
 
         AssertCollection(t.data(), t2.data());
+
+        // points to same memory
+        ASSERT_EQ(t.data().data(), t2.data().data());
     }
 
     TEST(TensorTests, TestReshape)
@@ -63,5 +66,8 @@ namespace MiniGrad
         std::vector<int>expected({0, 0, 0, 0, 0, 5});
         AssertCollection(expected, t.data());
         AssertCollection(expected, t2.data());
+
+        // points to same memory
+        ASSERT_EQ(t.data().data(), t2.data().data());
     }
 }
