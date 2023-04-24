@@ -86,6 +86,12 @@ namespace MiniGrad
             return *this;
         }
 
+        // Gradient helpers
+        bool requiresGrad() const 
+        {
+            return m_requiresGrad;
+        }
+
     private:
         void printTensor(std::ostream& oss, IndexArray indices = {}, size_t dim = 0) const
         {
@@ -127,5 +133,6 @@ namespace MiniGrad
 
         TensorShapeHelper m_shapeHelper;
         DataPtr m_data = nullptr;
+        bool m_requiresGrad = false;
     };
 }
