@@ -11,4 +11,5 @@ add_library(${BINARY}_lib STATIC ${SOURCE})
 
 target_compile_features(${BINARY} PRIVATE cxx_std_20)
 target_compile_features(${BINARY}_lib PRIVATE cxx_std_20)
+target_link_libraries(${BINARY} PRIVATE xtensor xtensor::optimize xtensor::use_xsimd)
 

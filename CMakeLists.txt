@@ -18,6 +18,11 @@ endforeach()
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+find_package(xtl REQUIRED)
+find_package(xtensor REQUIRED)
+find_path(XTENSOR_INCLUDE_DIR NAMES xtensor.hpp)
+include_directories(${XTENSOR_INCLUDE_DIR})
+
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(lib/googletest)
