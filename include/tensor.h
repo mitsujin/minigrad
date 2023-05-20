@@ -2,7 +2,9 @@
 #include <span>
 #include <memory>
 #include <algorithm>
+#include <sstream>
 
+#include <xtensor/xarray.hpp>
 #include "tensor_shape_utils.h"
 
 namespace MiniGrad
@@ -10,80 +12,70 @@ namespace MiniGrad
     template <typename T>
     concept Numeric = std::integral<T> || std::floating_point<T>;
 
-        
+    using shape_type = std::vector<size_t>;
+
     template <typename T> requires Numeric<T>
     class Tensor 
     {
     public:
-        using DataPtr = std::shared_ptr<T[]>;
+        using storage_type = xt::xarray<T, xt::layout_type::dynamic>;
+        using data_ptr_type = std::shared_ptr<storage_type>;
+        using shape_type = storage_type::shape_type;
 
         // More resarch
-        Tensor(const std::vector<size_t>& shape)
-        : m_shapeHelper(shape)
-        , m_data(new T[m_shapeHelper.size()], [](T* data) { delete[] data; })
+        Tensor(const shape_type& shape)
+        : m_data(std::make_shared<storage_type>(shape))
+        , m_view(xt::reshape_view(*m_data, shape_type(shape)))
         {
-            std::fill_n(m_data.get(), m_shapeHelper.size(), T{});
 
-            // TODO: Use a memory allocator here
         }
 
-        Tensor(const std::vector<size_t>& shape, DataPtr data, int size)
-        : m_shapeHelper(shape)
-        , m_data(data)
+        Tensor(const Tensor& o)
+        : m_data(o.m_data)
+        , m_view(xt::reshape_view(*o.m_data, o.m_data->shape()))
         {
-            if (m_shapeHelper.size() != size)
-            {
-                m_data = data;
-            }
-            else
-            {
-                throw std::runtime_error("Invalid shape");
-            }
+            std::cout << "Copy constructor";
         }
 
-        Tensor reshape(const std::vector<size_t>& shape)
+        Tensor(data_ptr_type data, const shape_type& shape)
+        : m_data(data)
+        , m_view(xt::reshape_view(*m_data, shape))
         {
-            return Tensor(shape, m_data, shape.size());
         }
 
-        T& at(const std::vector<size_t>& indices)
+        Tensor reshape(const shape_type& shape)
         {
-            size_t index = m_shapeHelper.calculateIndex(indices);
-            return m_data.get()[index];
+            return Tensor(m_data, shape);
         }
 
-        T at(const std::vector<size_t>& indices) const
+        template <typename... Args>
+        inline T operator()(Args... args) const 
         {
-            size_t index = m_shapeHelper.calculateIndex(indices);
-            return m_data.get()[index];
+            return (m_view)(args...);
+        }
+
+        template <typename... Args>
+        inline T& operator()(Args... args) 
+        {
+            return (m_view)(args...);
         }
 
         Tensor operator = (const Tensor& other) const
         {
-            return Tensor(m_shapeHelper.shape(), m_data, m_shapeHelper.size());
+            std::cout << "Operatror = ";
+            return Tensor(m_data, m_data.shape());
         }
 
-        std::span<T> data()
+        bool operator == (const Tensor& other) const
         {
-            return std::span<T>(m_data.get(), m_shapeHelper.size());
-        }
-
-        size_t size() const
-        {
-            return m_shapeHelper.size();
+            return *m_data == *other.m_data;
         }
 
         template <typename U>
         friend std::ostream& operator << (std::ostream& oss, const Tensor<U>& t)
         {
-            t.printTensor(oss);
+            //oss << t.m_view;
             return oss;
-        }
-
-        // Operations
-        Tensor& operator + (Tensor& other)
-        {
-            return *this;
         }
 
         // Gradient helpers
@@ -92,47 +84,22 @@ namespace MiniGrad
             return m_requiresGrad;
         }
 
-    private:
-        void printTensor(std::ostream& oss, IndexArray indices = {}, size_t dim = 0) const
+        std::string toString() const
         {
-            auto& shape = m_shapeHelper.shape();
-            auto& strides = m_shapeHelper.strides();
-            if (dim == shape.size() - 1) 
-            {
-                oss << "[";
-                for (size_t i = 0u; i < shape[dim]; i++)
-                {
-                    indices.push_back(i);
-                    oss << at(indices);
-                    indices.pop_back();
+            std::ostringstream oss;
+            oss << m_view;
 
-                    if (i != shape[dim] - 1)
-                    {
-                        oss << ", ";
-                    }
-                }
-                oss << "]";
-            }
-            else
-            {
-                oss << "[";
-                for (size_t i = 0u; i < shape[dim]; i++)
-                {
-                    indices.push_back(i);
-                    printTensor(oss, indices, dim + 1);
-                    indices.pop_back();
-
-                    if (i != shape[dim] - 1)
-                    {
-                        oss << ",\n";
-                    }
-                }
-                oss << "]";
-            }
+            return oss.str();
         }
 
-        TensorShapeHelper m_shapeHelper;
-        DataPtr m_data = nullptr;
+    private:
+        // Underlying data
+        std::shared_ptr<storage_type> m_data;
+
+        using view_type = decltype(xt::reshape_view(std::declval<storage_type&>(), std::declval<shape_type&>()));
+        view_type m_view;
+
+        bool m_isView = false;
         bool m_requiresGrad = false;
     };
 }
