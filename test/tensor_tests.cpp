@@ -27,14 +27,14 @@ namespace MiniGrad
     }
     TEST(TensorTests, TestCreation)
     {
-        Tensor<int> t({2, 3, 4});
+        Tensor<int> t = Tensor<int>::fromShape({2, 3, 4});
         t(0,1,0) = 2;
         //ASSERT_EQ(24u, t.size());
     }
 
     TEST(TensorTests, TestModify)
     {
-        Tensor<int> t({3});
+        Tensor<int> t = Tensor<int>::fromShape({3});
         t(1) = 3;
         t(2) = 4;
 
@@ -44,7 +44,7 @@ namespace MiniGrad
 
     TEST(TensorTests, TestAssignment)
     {
-        Tensor<int> t({4});
+        Tensor<int> t = Tensor<int>::fromShape({4});
         t(0) = 4;
         t(2) = 2;
 
@@ -54,12 +54,20 @@ namespace MiniGrad
 
     TEST(TensorTests, TestReshape)
     {
-        Tensor<int> t({1, 6});
+        Tensor<int> t = Tensor<int>::fromShape({1, 6});
         auto t2 = t.reshape({2, 3});
         t2(1, 2) = 5;
         ASSERT_EQ(t(5), t2(1,2));
 
         // points to same memory
         ASSERT_TRUE(t == t2);
+    }
+
+    TEST(TensorTests, TestFromData)
+    {
+        Tensor<int> t({{1,2,3},{4,5,6}});
+        Tensor<int>::shape_type shape({2,3});
+
+        ASSERT_EQ(shape, t.shape());
     }
 }

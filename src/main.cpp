@@ -12,11 +12,12 @@ using namespace MiniGrad;
 int main()
 {
     xt::xarray<double> ar = xt::linspace<double>(0.0, 10.0, 12.0);
+
     ar.reshape({4,3});
     std::cout << ar << std::endl;
     std::cout << xt::adapt(ar.shape()) << std::endl;
 
-    Tensor<double> tensor({4,4});
+    Tensor<double> tensor = Tensor<double>::fromShape({4,4});
     std::cout << tensor << std::endl;
 
     /*

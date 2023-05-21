@@ -22,12 +22,16 @@ namespace MiniGrad
         using data_ptr_type = std::shared_ptr<storage_type>;
         using shape_type = storage_type::shape_type;
 
-        // More resarch
-        Tensor(const shape_type& shape)
-        : m_data(std::make_shared<storage_type>(shape))
-        , m_view(xt::reshape_view(*m_data, shape_type(shape)))
+        //template <typename U> requires Numeric<U>
+        static Tensor<T> fromShape(shape_type shape)
         {
+            return Tensor<T>(storage_type::from_shape(shape));
+        }
 
+        Tensor(storage_type&& data) 
+        : m_data(new storage_type(std::move(data)))
+        , m_view(xt::reshape_view(*m_data, m_data->shape()))
+        {
         }
 
         Tensor(const Tensor& o)
@@ -46,6 +50,11 @@ namespace MiniGrad
         Tensor reshape(const shape_type& shape)
         {
             return Tensor(m_data, shape);
+        }
+
+        shape_type shape() const
+        {
+            return m_view.shape();
         }
 
         template <typename... Args>
@@ -102,4 +111,5 @@ namespace MiniGrad
         bool m_isView = false;
         bool m_requiresGrad = false;
     };
+
 }
